@@ -51,6 +51,7 @@ function Import-HomeFile {
         }
 
         Write-Host "Importing '$pathToImport'."
+        New-Item -Path (Split-Path -LiteralPath $repoPath) -ItemType Directory -Force | Out-Null
         Move-Item -LiteralPath $pathToImport -Destination $repoPath
         New-Item -Path $pathToImport -ItemType SymbolicLink -Value $repoPath | Out-Null
     }
