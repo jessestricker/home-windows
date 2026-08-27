@@ -1,0 +1,21 @@
+[user]
+	name = Jesse Stricker
+	email = git@jessestricker.de
+[core]
+	sshCommand = C:/Windows/System32/OpenSSH/ssh.exe
+	editor = code --wait
+[init]
+	defaultBranch = main
+[alias]
+	a = add
+	aa = add --all
+	b = branch
+	cm = commit --message
+	d = diff
+	dc = diff --cached
+	f = fetch --prune
+	g = graph
+	graph = log --all --decorate --oneline --graph
+	r = restore
+	rs = restore --staged
+	s = status
