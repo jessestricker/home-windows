@@ -1,0 +1,78 @@
+{
+  "$schema": "https://aka.ms/terminal-profiles-schema",
+  "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+  "profiles": {
+    "defaults": {
+      "bellStyle": "window",
+      "colorScheme": "Gnome (Jan 23, 2025)",
+      "cursorShape": "bar",
+      "font": {
+        "face": "Adwaita Mono",
+        "size": 14
+      }
+    },
+    "list": [
+      {
+        "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+        "hidden": false,
+        "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -NoLogo",
+        "name": "PowerShell",
+        "source": "Windows.Terminal.PowershellCore"
+      },
+      {
+        "guid": "{4ea70314-0005-5742-bb70-ca0e0290aede}",
+        "hidden": false,
+        "name": "Ubuntu",
+        "source": "Microsoft.WSL"
+      }
+    ]
+  },
+  "schemes": [
+    {
+      "background": "#1C1C1F",
+      "black": "#241F31",
+      "blue": "#1E78E4",
+      "brightBlack": "#5E5C64",
+      "brightBlue": "#51A1FF",
+      "brightCyan": "#4FD2FD",
+      "brightGreen": "#57E389",
+      "brightPurple": "#C061CB",
+      "brightRed": "#ED333B",
+      "brightWhite": "#F6F5F4",
+      "brightYellow": "#F8E45C",
+      "cursorColor": "#FFFFFF",
+      "cyan": "#0AB9DC",
+      "foreground": "#FFFFFF",
+      "green": "#2EC27E",
+      "name": "Gnome (Aug 11, 2025)",
+      "purple": "#9841BB",
+      "red": "#C01C28",
+      "selectionBackground": "#FFFFFF",
+      "white": "#C0BFBC",
+      "yellow": "#F5C211"
+    },
+    {
+      "background": "#1D1D20",
+      "black": "#1D1D20",
+      "blue": "#12488B",
+      "brightBlack": "#5D5D5D",
+      "brightBlue": "#2A7BDE",
+      "brightCyan": "#33C7DE",
+      "brightGreen": "#33D17A",
+      "brightPurple": "#C061CB",
+      "brightRed": "#F66151",
+      "brightWhite": "#FFFFFF",
+      "brightYellow": "#E9AD0C",
+      "cursorColor": "#CFCFCF",
+      "cyan": "#2AA1B3",
+      "foreground": "#CFCFCF",
+      "green": "#26A269",
+      "name": "Gnome (Jan 23, 2025)",
+      "purple": "#A347BA",
+      "red": "#C01C28",
+      "selectionBackground": "#CFCFCF",
+      "white": "#CFCFCF",
+      "yellow": "#A2734C"
+    }
+  ]
+}
