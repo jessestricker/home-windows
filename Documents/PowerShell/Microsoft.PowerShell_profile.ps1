@@ -1,3 +1,6 @@
+[cultureinfo]::CurrentCulture = "en-IE"
+[cultureinfo]::CurrentUICulture = "en-IE"
+
 # Key Bindings
 
 Set-PSReadLineKeyHandler -Chord 'Ctrl+Spacebar' -Function AcceptSuggestion
