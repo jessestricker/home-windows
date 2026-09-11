@@ -38,7 +38,7 @@
     "editor.tabSize": 2
   },
   "chat.disableAIFeatures": true,
-  "editor.fontFamily": "Adwaita Mono",
+  "editor.fontFamily": "Iosevka Expanded",
   "editor.fontSize": 15,
   "editor.minimap.enabled": false,
   "editor.stickyScroll.enabled": false,
@@ -79,6 +79,7 @@
   "telemetry.telemetryLevel": "off",
   "terminal.integrated.cursorStyle": "line",
   "terminal.integrated.enablePersistentSessions": false,
+"terminal.integrated.fontFamily": "Iosevka Term",
   "terminal.integrated.fontSize": 15,
   "terminal.integrated.initialHint": false,
   "terminal.integrated.sendKeybindingsToShell": true,
