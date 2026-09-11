@@ -1,59 +1,132 @@
+using namespace System.IO
+
+$HomeDir = [Path]::GetFullPath($HOME)
+$RepoDir = [Path]::GetFullPath("$PSScriptRoot\..")
+
+function Get-RepoFiles {
+    $excludedTopLevelEntries = ".git", ".github"
+
+    Get-ChildItem -LiteralPath $RepoDir -Force |
+        Where-Object { $_.Name -notin $excludedTopLevelEntries } |
+        ForEach-Object {
+            # expand directories recursively
+            if ($_ -is [DirectoryInfo]) {
+                Get-ChildItem -LiteralPath $_.FullName -Recurse -File -Force
+            }
+            else {
+                $_
+            }
+        } |
+        ForEach-Object { $_.FullName }
+}
+
+function Sync-HomeFiles {
+    [CmdletBinding()]
+    param ()
+
+    $ErrorActionPreference = "Stop"
+
+    $repoFiles = Get-RepoFiles
+    foreach ($repoFile in $repoFiles) {
+        Write-Debug "repoFile = $repoFile"
+
+        $relativePath = [Path]::GetRelativePath($RepoDir, $repoFile)
+        Write-Debug "relativePath = $relativePath"
+
+        $homeFile = [Path]::GetFullPath($relativePath, $HomeDir)
+        Write-Debug "homeFile = $homeFile"
+
+        # Check whether homeFile exists and links to the repo file.
+        try {
+            $homeFileLinkTarget = [File]::ResolveLinkTarget($homeFile, <# returnFinalTarget #> $false)
+            Write-Debug "homeFileLinkTarget = $homeFileLinkTarget"
+        }
+        catch [FileNotFoundException] {
+            # homeFile does not exist: create symbolic link.
+            [Directory]::CreateDirectory([Path]::GetDirectoryName($homeFile)) | Out-Null
+            [File]::CreateSymbolicLink($homeFile, $repoFile) | Out-Null
+
+            Write-Host "$($PSStyle.Foreground.Blue)Synced:$($PSStyle.Reset) $relativePath"
+            continue
+        }
+
+        if ($homeFileLinkTarget.FullName -eq $repoFile) {
+            # homeFile exists and links to the repoFile: nothing to do.
+            Write-Host "$($PSStyle.Foreground.Green)Ok:$($PSStyle.Reset) $relativePath"
+            continue
+        }
+
+        # homeFile exists but does not link to the repoFile: inform user.
+        Write-Host "$($PSStyle.Foreground.Red)Conflict:$($PSStyle.Reset) $relativePath"
+    }
+}
+
+Export-ModuleMember -Function Sync-HomeFiles
+
 function Import-HomeFile {
     [CmdletBinding(DefaultParameterSetName = "Path")]
-
     param (
-        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "Path")]
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ParameterSetName = "LiteralPath",
+            HelpMessage = "Literal path to one or more locations.")]
+        [Alias("PSPath")]
+        [ValidateNotNullOrEmpty()]
+        [string[]] $LiteralPath,
+
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ParameterSetName = "Path",
+            HelpMessage = "Path to one or more locations.")]
         [ValidateNotNullOrEmpty()]
         [SupportsWildcards()]
-        [string[]]
-        $Path,
-
-        [Parameter(Mandatory = $true, ParameterSetName = "LiteralPath")]
-        [ValidateNotNullOrEmpty()]
-        [string[]]
-        $LiteralPath
+        [string[]] $Path
     )
 
     $ErrorActionPreference = "Stop"
 
-    $pathsToImport = @()
-    if ($Path) {
-        $pathsToImport += Get-Item -Path $Path | ForEach-Object { $_ -as [string] }
+    $paths = @()
+    if ($null -ne $LiteralPath) {
+        $paths = $LiteralPath | ForEach-Object { Resolve-Path -LiteralPath $_ }
     }
-    if ($LiteralPath) {
-        $pathsToImport += Get-Item -LiteralPath $LiteralPath | ForEach-Object { $_ -as [string] }
+    if ($null -ne $Path) {
+        $paths = $Path | ForEach-Object { Resolve-Path -Path $_ }
     }
 
-    $repoDir = Resolve-Path -LiteralPath "$PSScriptRoot/.."
-    Write-Debug "repoDir: $repoDir"
+    foreach ($path in $paths) {
+        Write-Debug "path = $path"
 
-    foreach ($pathToImport in $pathsToImport) {
-        if (-not (Test-Path -LiteralPath $pathToImport -PathType Leaf)) {
-            Write-Warning "Path '$pathToImport' must point to a regular file."
-            continue
-        }
-        if ($pathToImport.StartsWith($repoDir)) {
-            Write-Warning "Path '$pathToImport' must not be from the repository."
-            continue
-        }
-        if (-not $pathToImport.StartsWith($HOME)) {
-            Write-Warning "Path '$pathToImport' must be from the home directory."
-            continue
-        }
+        $homeFile = (Resolve-Path -LiteralPath $Path).ProviderPath
+        Write-Debug "homeFile = $homeFile"
 
-        $relativePath = Resolve-Path -LiteralPath $pathToImport -Relative -RelativeBasePath $HOME
-        $repoPath = Join-Path $repoDir $relativePath
-        Write-Debug "pathToImport: $pathToImport, relativePath: $relativePath, repoPath: $repoPath"
-
-        if (Test-Path -LiteralPath $repoPath) {
-            Write-Warning "Path '$pathToImport' must not be imported already."
-            continue
+        if (-not [File]::Exists($homeFile)) {
+            throw "Path '$path' must point to an existing regular file."
+        }
+        if (-not $homeFile.StartsWith($HomeDir)) {
+            throw "Path '$path' must be from the home directory."
+        }
+        if ($homeFile.StartsWith($RepoDir)) {
+            throw "Path '$path' must not be from the repo directory."
         }
 
-        Write-Host "Importing '$pathToImport'."
-        New-Item -Path (Split-Path -LiteralPath $repoPath) -ItemType Directory -Force | Out-Null
-        Move-Item -LiteralPath $pathToImport -Destination $repoPath
-        New-Item -Path $pathToImport -ItemType SymbolicLink -Value $repoPath | Out-Null
+        $relativePath = [Path]::GetRelativePath($HomeDir, $homeFile)
+        Write-Debug "relativePath = $relativePath"
+
+        $repoFile = [Path]::GetFullPath($relativePath, $RepoDir)
+        Write-Debug "repoFile = $repoFile"
+
+        if ([Path]::Exists($repoFile)) {
+            Write-Host "$($PSStyle.Foreground.Red)Conflict:$($PSStyle.Reset) $relativePath"
+            continue
+        }
+
+        [Directory]::CreateDirectory([Path]::GetDirectoryName($repoFile)) | Out-Null
+        [File]::Move($homeFile, $repoFile)
+        [File]::CreateSymbolicLink($homeFile, $repoFile) | Out-Null
+
+        Write-Host "$($PSStyle.Foreground.Blue)Imported:$($PSStyle.Reset) $relativePath"
     }
 }
 
