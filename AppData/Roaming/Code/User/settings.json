@@ -93,6 +93,7 @@
   "terminal.integrated.stickyScroll.enabled": false,
   "window.autoDetectColorScheme": true,
   "window.commandCenter": false,
+  "window.density.layout": "compact",
   "window.zoomLevel": 1,
   "workbench.editor.empty.hint": "hidden",
   "workbench.editor.useModal": "off",
