@@ -1,7 +1,7 @@
 using namespace System.IO
 
 $HomeDir = [Path]::GetFullPath($HOME)
-$RepoDir = [Path]::GetFullPath("$PSScriptRoot\..")
+$RepoDir = [Path]::GetFullPath("$HOME\home-windows")
 
 function Get-RepoFiles {
     $excludedTopLevelEntries = ".git", ".github"
@@ -38,10 +38,10 @@ function Sync-HomeFiles {
 
         # Check whether homeFile exists and links to the repo file.
         try {
-            $homeFileLinkTarget = [File]::ResolveLinkTarget($homeFile, <# returnFinalTarget #> $false)
+            $homeFileLinkTarget = (Get-Item -LiteralPath $homeFile).Target
             Write-Debug "homeFileLinkTarget = $homeFileLinkTarget"
         }
-        catch [FileNotFoundException] {
+        catch [System.Management.Automation.ItemNotFoundException] {
             # homeFile does not exist: create symbolic link.
             [Directory]::CreateDirectory([Path]::GetDirectoryName($homeFile)) | Out-Null
             [File]::CreateSymbolicLink($homeFile, $repoFile) | Out-Null
@@ -50,7 +50,7 @@ function Sync-HomeFiles {
             continue
         }
 
-        if ($homeFileLinkTarget.FullName -eq $repoFile) {
+        if ($homeFileLinkTarget -eq $repoFile) {
             # homeFile exists and links to the repoFile: nothing to do.
             Write-Host "$($PSStyle.Foreground.Green)Ok:$($PSStyle.Reset) $relativePath"
             continue

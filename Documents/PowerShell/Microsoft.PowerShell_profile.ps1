@@ -1,7 +1,3 @@
-# Imports
-
-Import-Module "$((Get-Item $PSCommandPath).LinkTarget)\..\..\..\.github\Home.psm1"
-
 # Global Settings
 
 [cultureinfo]::CurrentCulture = "en-IE"

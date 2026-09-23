@@ -5,8 +5,7 @@
 ## First time setup
 
 ```powershell
-cd $HOME
-git clone git@github.com:jessestricker/home-windows.git
-Import-Module -Force .\.github\Home.psm1
+git clone git@github.com:jessestricker/home-windows.git $HOME/home-windows
+Import-Module -Force $HOME/home-windows/Documents/PowerShell/Modules/Home/Home.psm1
 Sync-HomeFiles
 ```
