@@ -5,7 +5,14 @@
 ## First time setup
 
 ```powershell
-git clone git@github.com:jessestricker/home-windows.git $HOME/home-windows
-Import-Module -Force $HOME/home-windows/Documents/PowerShell/Modules/Home/Home.psm1
+# Clone the repository to ~/home-windows.
+git clone git@github.com:jessestricker/home-windows.git ~/home-windows
+cd ~/home-windows
+
+# Install software.
+winget import --import-file ./.github/winget-packages.json --no-upgrade
+
+# Setup home file links.
+Import-Module -Force ./Documents/PowerShell/Modules/Home/Home.psm1
 Sync-HomeFiles
 ```
